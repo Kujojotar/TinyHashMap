@@ -1,6 +1,12 @@
 package space.glimmer.lab;
 
 import space.glimmer.lab.container.Bucket;
+import space.glimmer.lab.container.Entry;
+import space.glimmer.lab.container.NodeList;
+
+import java.util.concurrent.locks.*;
+
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Lehr
@@ -9,7 +15,7 @@ import space.glimmer.lab.container.Bucket;
  * 分为了a,b,c,d四个部分,每个部分完成后去进行对应的测试即可
  */
 public class GlimmerHashMap {
-
+    private volatile int size=0;
     /**
      * buckets数组的长度
      * 初始默认是4
@@ -17,7 +23,7 @@ public class GlimmerHashMap {
      * 不需要考虑收缩的情况
      */
     private int bucketLen = 4;
-
+    private ReentrantLock lock=new ReentrantLock();
     /**
      * 拉链法实现哈希表的这个数组,里面的每个桶Bucket里通过数据结构存放内容
      */
@@ -54,7 +60,7 @@ public class GlimmerHashMap {
      */
     public int size() {
         //todo:write your code here for part-a
-        return 0;
+        return size;
     }
 
     /**
@@ -63,10 +69,11 @@ public class GlimmerHashMap {
      * @param key
      * @return
      */
-    public String get(String key) {
+    public synchronized String get(String key) {
         //todo:write your code here for part-a
-        return null;
+        return buckets[hashIt(key)].getValue(key);
     }
+
 
     /**
      * 添加一组键值对,如果key已经存在了,则覆盖
@@ -76,12 +83,25 @@ public class GlimmerHashMap {
      * @param key
      * @param value
      * @return
-     */
+     **/
     public String put(String key, String value) {
         //todo:write your code here for part-a
         //todo:write your code here for part-b
         //todo:write your code here for part-c
-        return null;
+        if(this.size>=threshold){
+            this.resize();
+        }
+        lock.lock();
+        if(this.size()==8){
+            for(int a=0;a<bucketLen;a++){
+                buckets[a].nodelistToBst();
+            }
+        }
+        String e=buckets[hashIt(key)].putValue(key,value);
+        if(e==null) {
+            size++;
+        }
+        return e;
     }
 
     /**
@@ -93,7 +113,19 @@ public class GlimmerHashMap {
     public String remove(String key) {
         //todo:write your code here for part-a
         //todo:write your code here for part-b
-        return null;
+        if(this.size()==5){
+            for(int a=0;a<bucketLen;a++){
+                buckets[a].bstToNodelist();
+            }
+        }
+        String e=buckets[hashIt(key)].removeValue(key);
+        if(e==null){
+            lock.unlock();
+            return null;
+        }
+        size--;
+        lock.unlock();
+        return e;
     }
 
     /**
@@ -103,6 +135,21 @@ public class GlimmerHashMap {
      * 规则:buckets数组变为原来长度的两倍,阈值变为原来的两倍,重新哈希所有元素
      */
     private void resize() {
+        this.bucketLen*=2;
+        threshold*=2;
+        Bucket[] bucketss=new Bucket[bucketLen];
+        for(int i=0;i<bucketLen;i++){
+            bucketss[i]=new Bucket();
+        }
+        for(int i=0;i<bucketLen/2;i++){
+            Entry[] arr=buckets[i].getContainer().traverse();
+            for(Entry e:arr){
+                if(e!=null) {
+                    bucketss[hashIt(e.key)].putValue(e.key, e.value);
+                }
+            }
+        }
+        this.buckets=bucketss;
         //todo:write your code here for part-c
     }
 
@@ -125,7 +172,6 @@ public class GlimmerHashMap {
      */
     public int hashIt(String key) {
         return key==null?0:Math.abs(key.hashCode()) % bucketLen;
-
     }
 
     /**

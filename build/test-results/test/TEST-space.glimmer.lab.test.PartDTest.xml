@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="space.glimmer.lab.test.PartDTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2021-01-21T12:28:05" hostname="LAPTOP-3QAG84GT" time="0.575">
+  <properties/>
+  <testcase name="basicConcurrencyTestD" classname="space.glimmer.lab.test.PartDTest" time="0.575"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -44,6 +44,5 @@ public interface BucketContainer {
      * @return
      */
     Entry[] traverse();
-
 }
 
