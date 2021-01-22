@@ -22,6 +22,8 @@ public class Bst implements BucketContainer{
     /**
      * 搜索某个元素并返回
      * 其中key是这个元素Entry的key
+     * 搜索时比较key的hashcode与元素Entry的key的hashcode，小于时向左子树搜索，大于或等于时像右子树搜索
+     * 如果出现需要往左子树搜索但左孩子为空或需要往右子树搜索但右子树为空的情况，则停止搜索并返回null值代表没有搜索到元素
      * @param key
      * @return
      */
@@ -65,6 +67,11 @@ public class Bst implements BucketContainer{
 
     /**
      * 添加一个元素
+     * 从根节点开始，依次比较节点key的hashcode与插入元素e的hashcode
+     * 如果根节点content为null，直接将content赋为e
+     * 如果e.key的hashcode位于两个节点的元素的hashcode之间（大于等于根节点且小于等于右孩子节点或小于根节点且大于左孩子节点），new一个节点储存e，并将新new的节点插入在两节点之间
+     * 如果根节点没有与向对应方向递归的孩子，则new一个节点作为对应方向的孩子并插入e
+     * 以上情况均未出现，则比较key的hashcode与根节点的hashcode，往对应方向递归插入节点。
      * @param e
      */
     @Override
@@ -149,6 +156,9 @@ public class Bst implements BucketContainer{
 
     /**
      * 更新一个节点
+     * 首先搜素节点，获得节点元素
+     * 若没搜索到元素，则返回
+     * 若搜索到元素，直接更新元素的value，之后返回
      * @param e
      */
     @Override
@@ -163,6 +173,11 @@ public class Bst implements BucketContainer{
 
     /**
      * 删除一个节点
+     * 首先比较key的hashcode与节点content.key的hashcode
+     * 如果不相等时往对应方向递归删除，相等时先比较两个key是否相等，不相等时向右子树递归删除
+     * 相等时如果节点为叶子节点，直接将content置空作为删除
+     * 如果不是叶子节点且只有左孩子，从左子树中找出key的hashcode最大的content替换目标节点的content，并删除左子树key的hashcode最大的节点
+     * 如果右孩子，从右子树中找出key的hashcode最小的content替换目标节点的content，并删除右子树key的hashcode最小的节点
      * @param key
      */
     @Override
@@ -291,7 +306,9 @@ public class Bst implements BucketContainer{
         }
         return 1+count(bst.left)+count(bst.right);
     }
-
+    /**
+    * 辅助方法：通过先序遍历向Entry数组插入元素
+    */
     public int insert(Entry[] arr,int index,Bst bst){
         if(bst==null||bst.content==null){
             return index;
